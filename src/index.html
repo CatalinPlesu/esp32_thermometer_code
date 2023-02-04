@@ -1,0 +1,146 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+        integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
+
+    <style>
+        html {
+            font-family: Arial;
+            display: inline-block;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 3.0rem;
+        }
+
+        p {
+            font-size: 3.0rem;
+        }
+
+        .units {
+            font-size: 1.2rem;
+        }
+
+        .ds-labels {
+            font-size: 1.5rem;
+            vertical-align: middle;
+            padding-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Server Sera</h2>
+    <p id="refresh">
+        <i class="fas fa-thermometer-half" style="color:#059e8a;"></i>
+        <span class="ds-labels">Temperatura:</span>
+        <span id="temperaturec">%TEMPERATUREC%</span>
+        <sup class="units">&deg;C</sup>
+    </p>
+    <hr style="margin-top: 100px">
+    <div style="text-align: center; width: 100%;">
+        <canvas id="myChart" style="width:100%;max-width:700px; display: inline;"></canvas>
+    </div>
+    <div style="text-align: right; width: 100%;">
+        <input id="clickMe" type="button" value="sterge datele" onclick="Remove();" />
+    </div>
+</body>
+<script>
+    var xValues = [];
+    var yValues = [];
+
+    window.addEventListener("load", function () {
+        Load();
+        getTemperature();
+    });
+
+    setInterval(function () {
+        getTemperature();
+    }, 60000);
+
+
+    function getTemperature() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            var curent_temperature = -199;
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    if (this.status == 200) {
+                        curent_temperature = this.responseText;
+                    } else {
+                        curent_temperature = -199;
+                    }
+                }
+            };
+            addData(curent_temperature);
+            document.getElementById("temperaturec").innerHTML = curent_temperature;
+
+        };
+        xhttp.open("GET", "/temperaturec", true);
+        xhttp.send();
+    }
+
+    document.getElementById("refresh").addEventListener("click", function () {
+        getTemperature();
+    });
+
+    function Store() {
+        localStorage.setItem('xValues', JSON.stringify(xValues));
+        localStorage.setItem('yValues', JSON.stringify(yValues));
+    }
+
+    function Load() {
+        if (localStorage.getItem("xValues")) {
+            xValues = JSON.parse(localStorage.getItem("xValues"));
+            yValues = JSON.parse(localStorage.getItem("yValues"));
+        }
+        updateChart();
+    }
+
+    function Remove() {
+        localStorage.clear();
+        xValues = [];
+        yValues = [];
+        getTemperature();
+    }
+
+    function addData(temperature) {
+        xValues.push(new Date().toLocaleString());
+        yValues.push(temperature);
+        Store();
+        updateChart();
+    }
+
+    function updateChart(){
+        chart.data.labels = xValues;
+        chart.data.datasets[0].data = yValues;
+        chart.update();
+    }
+
+    var chart = new Chart("myChart", {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: [{
+                borderColor: "rgba(0,25,225,1)",
+                data: yValues
+            }]
+        },
+        options: {
+            legend: { display: false }
+        }
+    });
+
+
+</script>
+
+</html>

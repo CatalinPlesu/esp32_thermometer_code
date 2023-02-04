@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    function loadPage() {
+      fetch("https://catalinplesu.github.io/esp32_termometer/")
+        .then(response => response.text())
+        .then(html => {
+          document.open();
+          document.write(html);
+          document.close();
+        });
+    }
+  </script>
+</head>
+<body onload="loadPage()">
+  <!-- contents of the original page will be replaced by contents of another-page.html before it loads -->
+</body>
+</html>
